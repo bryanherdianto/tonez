@@ -1,153 +1,183 @@
-// Kolom deklarasi variabel
-let input = document.querySelector('input');
-let button = document.querySelector('button');
-button.addEventListener('click', onClick);
+// Element references
+const inputEl = document.getElementById("input");
+const button = document.getElementById("submit-btn");
+const resultEl = document.getElementById("result");
+const loaderWrap = document.getElementById("loader-wrap");
+const mainApp = document.getElementById("mainAPP");
+const historyListEl = document.getElementById("history-list");
+const exampleChips = document.querySelectorAll(".chip");
 
 let isModelLoaded = false;
 let model;
 let word2index;
+const history = [];
+const MAX_HISTORY = 8;
 
-// Parameter data preprocessing
+// Data preprocessing parameters
 const maxlen = 20;
-const vocab_size = 2000;
-const padding = 'post';
-const truncating = 'post';
+const padding = "post";
+const truncating = "post";
 
-var myVar;
+function detectWebGLContext() {
+  const canvas = document.createElement("canvas");
+  const gl =
+    canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
 
-function myFunction() {
-    myVar = setTimeout(showPage, 3000);
+  if (gl && gl instanceof WebGLRenderingContext) {
+    init();
+  } else {
+    showResult(
+      "Your browser or device does not support WebGL, which is required to run this demo.",
+      "error",
+    );
+  }
 }
 
-function showPage() {
-    document.getElementById("loaderlabel").style.display = "none";
-    document.getElementById("loader").style.display = "none";       
-    document.getElementById("mainAPP").style.display = "block";
-}
-
-function detectWebGLContext () {
-    // Create canvas element. The canvas is not added to the
-    // document itself, so it is never displayed in the
-    // browser window.
-    var canvas = document.createElement("canvas");
-    
-    // Get WebGLRenderingContext from canvas element.
-    var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-    
-    // Report the result.
-    if (gl && gl instanceof WebGLRenderingContext) {
-        console.log("Congratulations! Your browser supports WebGL.");
-        init();
-    } else {
-        alert("Failed to get WebGL context. Your browser or device may not support WebGL.");
-    }
-}
-
-detectWebGLContext();
-
-// Kolom fungsi `getInput()`
-// Fungsi untuk mengambil input review
-function getInput(){
-    const reviewText = document.getElementById('input')
-    return reviewText.value;
-}
-
-// Kolom fungsi `padSequence()`
-// Fungsi untuk melakukan padding
-function padSequence(sequences, maxLen, padding='post', truncating = "post", pad_value = 0){
-    return sequences.map(seq => {
-        if (seq.length > maxLen) {
-            if (truncating === 'pre'){
-                seq.splice(0, seq.length - maxLen);
-            } else {
-                seq.splice(maxLen, seq.length - maxLen);
-            }
-        }
-                
-        if (seq.length < maxLen) {
-            const pad = [];
-            for (let i = 0; i < maxLen - seq.length; i++){
-                pad.push(pad_value);
-            }
-            if (padding === 'pre') {
-                seq = pad.concat(seq);
-            } else {
-                seq = seq.concat(pad);
-            }
-        }               
-        return seq;
-        });
-}
-
-
-// Kolom fungsi `predict()`
-// Fungsi untuk melakukan prediksi
-function predict(inputText){
-
-    // Mengubah input review ke dalam bentuk token
-    const sequence = inputText.map(word => {
-        let indexed = word2index[word];
-
-        if (indexed === undefined){
-            return 1; // Change to oov value
-        }
-        return indexed;
-    });
-    
-    // Melakukan padding
-    const paddedSequence = padSequence([sequence], maxlen);
-
-    const score = tf.tidy(() => {
-        const input = tf.tensor2d(paddedSequence, [1, maxlen]);
-        const result = model.predict(input);
-        return result.dataSync()[0];
-    });
-
-    return score;  
-
-}
-
-// Kolom fungsi `onClick()`
-// Fungsi yang dijalankan ketika tombol "Post Review" diklik
-function onClick(){
-    
-    if(!isModelLoaded) {
-        alert('Model not loaded yet');
-        return;
+function padSequence(
+  sequences,
+  maxLen,
+  padding = "post",
+  truncating = "post",
+  padValue = 0,
+) {
+  return sequences.map((seq) => {
+    if (seq.length > maxLen) {
+      if (truncating === "pre") {
+        seq.splice(0, seq.length - maxLen);
+      } else {
+        seq.splice(maxLen, seq.length - maxLen);
+      }
     }
 
-    if (getInput() === '') {
-        alert("Review Can't be Null");
-        document.getElementById('input').focus();
-        return;
+    if (seq.length < maxLen) {
+      const pad = new Array(maxLen - seq.length).fill(padValue);
+      seq = padding === "pre" ? pad.concat(seq) : seq.concat(pad);
     }
-    
-    // 
-    const inputText = getInput().trim().toLowerCase().split(" ");
 
-    // Score prediksi dengan nilai 0 - 1 
-    let score = predict(inputText); 
-
-    // Kondisi penentuan hasil prediksi berdasarkan nilai score
-    if (score > 0.5) {
-        alert ('Positive Review \n'+score);
-    } else {
-        alert ('Negative Review \n'+score);
-    }
+    return seq;
+  });
 }
 
-// Kolom fungsi `init()`
-async function init(){
-    // Memanggil model tfjs
-    // model = await tf.loadLayersModel('http://127.0.0.1:5500/tfjs_model/model.json'); // Untuk VS Code Live Server
-    model = await tf.loadLayersModel('https://bryanherdianto.github.io/sentiment-website/tfjs_model/model.json');
-    isModelLoaded = true;
+function predict(inputText) {
+  // Turn the review into a sequence of token indices
+  const sequence = inputText.map((word) => {
+    const indexed = word2index[word];
+    return indexed === undefined ? 1 : indexed; // 1 = out-of-vocabulary token
+  });
 
-    // Memanggil word_index
-    // const word_indexjson = await fetch('http://127.0.0.1:5500/word_index.json'); // Untuk VS Code Live Server
-    const word_indexjson = await fetch('https://bryanherdianto.github.io/sentiment-website/word_index.json'); 
+  const paddedSequence = padSequence([sequence], maxlen, padding, truncating);
+
+  return tf.tidy(() => {
+    const inputTensor = tf.tensor2d(paddedSequence, [1, maxlen]);
+    const result = model.predict(inputTensor);
+    return result.dataSync()[0];
+  });
+}
+
+function showResult(message, type) {
+  resultEl.textContent = message;
+  resultEl.className = "result" + (type ? " " + type : "");
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function renderHistory() {
+  if (history.length === 0) {
+    historyListEl.innerHTML =
+      '<li class="history-empty">No reviews analyzed yet — try one above!</li>';
+    return;
+  }
+
+  historyListEl.innerHTML = history
+    .map(
+      (entry) => `
+        <li class="history-item">
+          <div class="history-text">"${escapeHtml(entry.text)}"</div>
+          <div class="history-meta">
+            <span class="badge ${entry.label.toLowerCase()}">${entry.label}</span>
+            <span class="history-score">${entry.score.toFixed(3)}</span>
+            <span class="history-time">${entry.time}</span>
+          </div>
+        </li>
+      `,
+    )
+    .join("");
+}
+
+function addHistoryEntry(text, score, label) {
+  history.unshift({
+    text,
+    score,
+    label,
+    time: new Date().toLocaleTimeString(),
+  });
+  history.length = Math.min(history.length, MAX_HISTORY);
+  renderHistory();
+}
+
+function onClick() {
+  if (!isModelLoaded) {
+    showResult("Model is still loading, please wait a moment.", "warning");
+    return;
+  }
+
+  const review = inputEl.value.trim();
+  if (review === "") {
+    showResult("Review can't be empty.", "warning");
+    inputEl.focus();
+    return;
+  }
+
+  const inputText = review.toLowerCase().split(/\s+/);
+  const score = predict(inputText);
+  const label = score > 0.5 ? "Positive" : "Negative";
+
+  showResult(
+    `${label} review (score: ${score.toFixed(3)})`,
+    label.toLowerCase(),
+  );
+  addHistoryEntry(review, score, label);
+}
+
+async function init() {
+  try {
+    // Relative paths so the demo works both locally (via a local server) and on GitHub Pages
+    model = await tf.loadLayersModel("tfjs_model/model.json");
+
+    const word_indexjson = await fetch("word_index.json");
     word2index = await word_indexjson.json();
 
-    console.log(model.summary()); 
-    console.log('Model & Metadata Loaded Succesfully');
+    isModelLoaded = true;
+    loaderWrap.style.display = "none";
+    mainApp.style.display = "block";
+
+    console.log("Model & metadata loaded successfully");
+  } catch (err) {
+    showResult(
+      "Failed to load the model. Please refresh and try again.",
+      "error",
+    );
+    console.error(err);
+  }
 }
+
+button.addEventListener("click", onClick);
+inputEl.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    onClick();
+  }
+});
+
+exampleChips.forEach((chip) => {
+  chip.addEventListener("click", () => {
+    inputEl.value = chip.dataset.example;
+    inputEl.focus();
+    onClick();
+  });
+});
+
+detectWebGLContext();

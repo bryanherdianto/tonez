@@ -1,64 +1,138 @@
-<html>
+<!doctype html>
+<html lang="en">
   <head>
-    <title>Tensorflow.js: Sentiment Analysis Demo</title>
-    
-    <link href="styles/style.css" rel="stylesheet">
-    <link href='https://fonts.googleapis.com/css?family=Sofia' rel='stylesheet'>      
-    <link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet'>  
-    <link href='https://fonts.googleapis.com/css?family=Pontano Sans' rel='stylesheet'> 
-    
-    <!-- Memanggil versi terbaru TensorFlow.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"> </script>
-    <!--  -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tonez | Sentiment Analysis Demo</title>
+
+    <link rel="icon" type="image/x-icon" href="styles/favicon.ico" />
+    <link href="styles/style.css" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Oswald&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
   </head>
-  <body onload="myFunction()" style="margin:0;">
-    <div class = "header">
-      <img src="styles/logo.jpg"></img>
-    </div>
-    
-    <!-- Add a <div> tag with the "main" class -->
-    <div class = "main">
-    <div class="container">
-      <img src="styles/tensorflow_logo.png"></img>
-      <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&amp;lang=en" />
-      <link href='https://fonts.googleapis.com/css?family=Archivo Narrow' rel='stylesheet'>
-      
-      <h1>Tensorflow.js</h1>
-      <h2>Sentiment Analysis Demo</h2>
-      
-      <h3>
-      <p>
-        This example demonstrated loading a pre-trained model and using it in the browser. This model is trained to
-        predict the sentiment of a short restaurant review (as a score between 0 and 1). The training is done server side
-        using Python and then converted into a TensorFlow.js model.
-      </p>
-      <p>
-        The model is trained using YELP reviews that have been truncated to a maximum of 20 words, only the
-        2000 most used words in the reviews are used. You can experiment with the model on this page
-      </p>
-      </h3>
-      
-    </div>
-    </div>
-    
-    <div class="container">
-    <div class = "demo">
-      <h1>Thank you for your visit!</h1>
-      <h2>We are committed to providing our customers with a fantastic experience, and your feedback helps us make that possible.</h2>
-      <br><br>
-      <div id="loaderlabel"<h2>Loading Model...</h2></div>
-      <div id="loader"> </div>   
-      <div style="display:none;" id="mainAPP">
-      <label for="input">How was your dinner? </label><br><br>
-      <input placeholder="Try: 'The salad is fresh and delicious" id="input">
-      <button class="button" style="vertical-align:middle"><span>Post Review </span></button>
-      <p></p>
-    </div>     
-    </div>  
-          
-    </div>
-      <!-- Memanggil script.js -->
-      <script src="script.js"></script>
-      <!--  -->
+  <body>
+    <header class="site-header">
+      <div class="brand">
+        <img src="styles/logo.png" alt="Tonez logo" class="logo" />
+        <span class="site-title">Tonez</span>
+      </div>
+      <nav class="site-nav">
+        <a href="#demo">Demo</a>
+        <a href="#history">History</a>
+        <a href="#about">About</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="top-row">
+        <section class="info-card">
+          <h1>Tonez</h1>
+          <h2>Sentiment Analysis Demo</h2>
+          <p>
+            Tonez loads a pre-trained model straight into your browser with
+            TensorFlow.js and reads the tone of a short restaurant review as a
+            score between 0 and 1. Training happens server-side using Python,
+            and the resulting model runs entirely client-side.
+          </p>
+          <p>
+            The model is trained on Yelp reviews truncated to a maximum of 20
+            words, using only the 2000 most common words found in the reviews.
+            Try it out for yourself below.
+          </p>
+        </section>
+
+        <section class="demo-card" id="demo">
+          <h2>Try it yourself</h2>
+          <p class="subtitle">
+            Write a short restaurant review and see whether Tonez thinks it's
+            positive or negative.
+          </p>
+
+          <div id="loader-wrap">
+            <div id="loader"></div>
+            <p id="loaderlabel">Loading model...</p>
+          </div>
+
+          <div id="mainAPP" style="display: none">
+            <div class="examples">
+              <span class="examples-label">Quick try:</span>
+              <button
+                type="button"
+                class="chip"
+                data-example="The food was absolutely amazing and the staff were so friendly"
+              >
+                Positive
+              </button>
+              <button
+                type="button"
+                class="chip"
+                data-example="The service was slow and the pasta was cold and bland"
+              >
+                Negative
+              </button>
+            </div>
+
+            <label for="input">How was your dinner?</label>
+            <div class="input-row">
+              <input id="input" placeholder="Try a restaurant review..." />
+              <button id="submit-btn" class="button">
+                <span>Post Review</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="result" class="result" aria-live="polite"></div>
+        </section>
+      </div>
+
+      <section class="history-card" id="history">
+        <h2>Recent Reviews</h2>
+        <p class="subtitle">
+          Every review you test this session shows up here so you can compare
+          results.
+        </p>
+        <ul id="history-list" class="history-list">
+          <li class="history-empty">No reviews analyzed yet!</li>
+        </ul>
+      </section>
+
+      <section class="about-card" id="about">
+        <h2>About the Model</h2>
+        <div class="about-grid">
+          <div>
+            <h3>Dataset</h3>
+            <p>
+              1,000 labeled Yelp restaurant reviews, split between positive and
+              negative sentiment.
+            </p>
+          </div>
+          <div>
+            <h3>Preprocessing</h3>
+            <p>
+              Reviews are lowercased and tokenized using the 2,000 most frequent
+              words in the dataset, then padded or truncated to 20 tokens.
+            </p>
+          </div>
+          <div>
+            <h3>Training</h3>
+            <p>
+              Trained for 30 epochs with the Adam optimizer and binary
+              cross-entropy loss, reaching around 99% training accuracy and 75%
+              validation accuracy.
+            </p>
+          </div>
+        </div>
+        <p class="about-note">
+          Trained in Python with TensorFlow and Keras, then converted to
+          TensorFlow.js so it runs entirely in your browser.
+        </p>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
   </body>
 </html>
