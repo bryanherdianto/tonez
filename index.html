@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tonez | Sentiment Analysis Demo</title>
+    <title>Tonez</title>
 
     <link rel="icon" type="image/x-icon" href="styles/favicon.ico" />
     <link href="styles/style.css" rel="stylesheet" />
@@ -11,128 +11,76 @@
       href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Oswald&display=swap"
       rel="stylesheet"
     />
-
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
   </head>
   <body>
     <header class="site-header">
-      <div class="brand">
+      <a href="index.html" class="brand">
         <img src="styles/logo.png" alt="Tonez logo" class="logo" />
         <span class="site-title">Tonez</span>
-      </div>
+      </a>
       <nav class="site-nav">
-        <a href="#demo">Demo</a>
-        <a href="#history">History</a>
-        <a href="#about">About</a>
+        <a href="sentiment.html">Sentiment</a>
+        <a href="gesture.html">Gesture</a>
       </nav>
     </header>
 
     <main>
+      <section class="info-card">
+        <span class="eyebrow">In-browser ML demos</span>
+        <h1>Tonez</h1>
+        <p>
+          A small collection of machine learning models that run entirely in
+          your browser. Pick a demo below to try one out.
+        </p>
+      </section>
+
       <div class="top-row">
-        <section class="info-card">
-          <h1>Tonez</h1>
-          <h2>Sentiment Analysis Demo</h2>
+        <a href="sentiment.html" class="demo-link-card">
+          <span class="demo-icon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+              />
+            </svg>
+          </span>
+          <h2>Sentiment Analysis</h2>
           <p>
-            Tonez loads a pre-trained model straight into your browser with
-            TensorFlow.js and reads the tone of a short restaurant review as a
-            score between 0 and 1. Training happens server-side using Python,
-            and the resulting model runs entirely client-side.
+            Type a short restaurant review and Tonez scores it between 0
+            (negative) and 1 (positive), right in your browser.
           </p>
+          <span class="card-cta">Try it <span class="arrow">&rarr;</span></span>
+        </a>
+
+        <a href="gesture.html" class="demo-link-card">
+          <span class="demo-icon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4-6.3-4.6L5.7 21.4 8 14 2 9.4h7.6z"
+              />
+            </svg>
+          </span>
+          <h2>Gesture Recognizer</h2>
           <p>
-            The model is trained on Yelp reviews truncated to a maximum of 20
-            words, using only the 2000 most common words found in the reviews.
-            Try it out for yourself below.
+            Draw an arrow, checkmark, cross, or star on the canvas and a small
+            CNN classifies it on the spot.
           </p>
-        </section>
-
-        <section class="demo-card" id="demo">
-          <h2>Try it yourself</h2>
-          <p class="subtitle">
-            Write a short restaurant review and see whether Tonez thinks it's
-            positive or negative.
-          </p>
-
-          <div id="loader-wrap">
-            <div id="loader"></div>
-            <p id="loaderlabel">Loading model...</p>
-          </div>
-
-          <div id="mainAPP" style="display: none">
-            <div class="examples">
-              <span class="examples-label">Quick try:</span>
-              <button
-                type="button"
-                class="chip"
-                data-example="The food was absolutely amazing and the staff were so friendly"
-              >
-                Positive
-              </button>
-              <button
-                type="button"
-                class="chip"
-                data-example="The service was slow and the pasta was cold and bland"
-              >
-                Negative
-              </button>
-            </div>
-
-            <label for="input">How was your dinner?</label>
-            <div class="input-row">
-              <input id="input" placeholder="Try a restaurant review..." />
-              <button id="submit-btn" class="button">
-                <span>Post Review</span>
-              </button>
-            </div>
-          </div>
-
-          <div id="result" class="result" aria-live="polite"></div>
-        </section>
+          <span class="card-cta">Try it <span class="arrow">&rarr;</span></span>
+        </a>
       </div>
-
-      <section class="history-card" id="history">
-        <h2>Recent Reviews</h2>
-        <p class="subtitle">
-          Every review you test this session shows up here so you can compare
-          results.
-        </p>
-        <ul id="history-list" class="history-list">
-          <li class="history-empty">No reviews analyzed yet!</li>
-        </ul>
-      </section>
-
-      <section class="about-card" id="about">
-        <h2>About the Model</h2>
-        <div class="about-grid">
-          <div>
-            <h3>Dataset</h3>
-            <p>
-              1,000 labeled Yelp restaurant reviews, split between positive and
-              negative sentiment.
-            </p>
-          </div>
-          <div>
-            <h3>Preprocessing</h3>
-            <p>
-              Reviews are lowercased and tokenized using the 2,000 most frequent
-              words in the dataset, then padded or truncated to 20 tokens.
-            </p>
-          </div>
-          <div>
-            <h3>Training</h3>
-            <p>
-              Trained for 30 epochs with the Adam optimizer and binary
-              cross-entropy loss, reaching around 99% training accuracy and 75%
-              validation accuracy.
-            </p>
-          </div>
-        </div>
-        <p class="about-note">
-          Trained in Python with TensorFlow and Keras, then converted to
-          TensorFlow.js so it runs entirely in your browser.
-        </p>
-      </section>
     </main>
-
-    <script src="script.js"></script>
   </body>
 </html>

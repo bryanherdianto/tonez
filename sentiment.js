@@ -6,6 +6,8 @@ const loaderWrap = document.getElementById("loader-wrap");
 const mainApp = document.getElementById("mainAPP");
 const historyListEl = document.getElementById("history-list");
 const exampleChips = document.querySelectorAll(".chip");
+const meterEl = document.getElementById("meter");
+const meterFillEl = document.getElementById("meter-fill");
 
 let isModelLoaded = false;
 let model;
@@ -79,6 +81,12 @@ function showResult(message, type) {
   resultEl.className = "result" + (type ? " " + type : "");
 }
 
+function showMeter(score, label) {
+  meterFillEl.style.width = `${Math.round(score * 100)}%`;
+  meterFillEl.className = "meter-fill " + label.toLowerCase();
+  meterEl.hidden = false;
+}
+
 function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str;
@@ -140,15 +148,16 @@ function onClick() {
     `${label} review (score: ${score.toFixed(3)})`,
     label.toLowerCase(),
   );
+  showMeter(score, label);
   addHistoryEntry(review, score, label);
 }
 
 async function init() {
   try {
     // Relative paths so the demo works both locally (via a local server) and on GitHub Pages
-    model = await tf.loadLayersModel("tfjs_model/model.json");
+    model = await tf.loadLayersModel("tfjs_model_sentiment/model.json");
 
-    const word_indexjson = await fetch("word_index.json");
+    const word_indexjson = await fetch("notebooks/word_index.json");
     word2index = await word_indexjson.json();
 
     isModelLoaded = true;

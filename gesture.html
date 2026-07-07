@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tonez | Gesture Shortcut Recognizer</title>
+
+    <link rel="icon" type="image/x-icon" href="styles/favicon.ico" />
+    <link href="styles/style.css" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Oswald&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a href="index.html" class="brand">
+        <img src="styles/logo.png" alt="Tonez logo" class="logo" />
+        <span class="site-title">Tonez</span>
+      </a>
+      <nav class="site-nav">
+        <a href="sentiment.html">Sentiment</a>
+        <a href="gesture.html" class="active">Gesture</a>
+      </nav>
+    </header>
+
+    <main class="demo-page">
+      <section class="demo-card" id="demo">
+        <span class="eyebrow">Gesture Recognizer</span>
+        <h2>Draw a symbol</h2>
+        <p class="subtitle">
+          Sketch one of the four symbols below, then lift your pointer and a
+          small CNN classifies it on the spot.
+        </p>
+
+        <ul class="legend" aria-hidden="true">
+          <li>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
+            <span>Arrow</span>
+          </li>
+          <li>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="4 13 9 18 20 6" />
+            </svg>
+            <span>Check</span>
+          </li>
+          <li>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="6" y1="6" x2="18" y2="18" />
+              <line x1="18" y1="6" x2="6" y2="18" />
+            </svg>
+            <span>Cross</span>
+          </li>
+          <li>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polygon
+                points="12 3 14.5 9 21 9.3 16 13.5 17.7 20 12 16.2 6.3 20 8 13.5 3 9.3 9.5 9"
+              />
+            </svg>
+            <span>Star</span>
+          </li>
+        </ul>
+
+        <div id="loader-wrap">
+          <div id="loader"></div>
+          <p id="loaderlabel">Loading model...</p>
+        </div>
+
+        <div id="mainAPP" style="display: none">
+          <div class="canvas-wrap">
+            <canvas id="gesture-canvas" width="280" height="280"></canvas>
+          </div>
+
+          <div class="canvas-controls">
+            <button id="clear-btn" class="button button-ghost" type="button">
+              <span>Clear</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="result" class="result" aria-live="polite">
+          Draw a symbol...
+        </div>
+      </section>
+    </main>
+
+    <script src="gesture.js"></script>
+  </body>
+</html>
